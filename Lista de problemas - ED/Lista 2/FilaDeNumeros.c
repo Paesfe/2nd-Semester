@@ -1,96 +1,94 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
-typedef struct data {
-    void* variable;
-} data;
+#include <string.h> 
 
 typedef struct node {
-    data data;          
-    struct node* next;   
+    int data; 
+    struct node* next;
 } node;
 
-typedef struct stack {
-    node* top;       
+typedef struct queue {
+    node* head;  
+    node* tail;          
     int currentSize;     
-} stack;
+} queue;
 
-stack* create_stack() {
-    stack* new_stack = (stack*) malloc(sizeof(stack));
-    if (new_stack != NULL) {
-        new_stack->top = NULL;
-        new_stack->currentSize = 0;
+queue* create_queue() {
+    queue* new_queue = (queue*) malloc(sizeof(queue));
+    if (new_queue != NULL) {
+        new_queue->head = NULL;
+        new_queue->tail = NULL;
+        new_queue->currentSize = 0;
     }
-    return new_stack;
+    return new_queue;
 }
 
-bool stackEmpty(stack* stack) {
-    if (stack == NULL) return true;
-    return (stack->top == NULL);
+bool isQueueEmpty(queue* q) {
+    if (q == NULL) return true;
+    return (q->head == NULL);
 }
 
-void push(stack* stack) {
-    if (stack == NULL) return;
-
-    int variable;
-    scanf("%d", &variable);
+void enqueue(queue* q, int data) {
+    if (q == NULL) return;
 
     node* new_node = (node*) malloc(sizeof(node));
-    if (new_node == NULL) return;
+    if (new_node == NULL) return; 
 
-    new_node->data.variable = variable;
-    new_node->next = stack->top;  
+    new_node->data = data;
+    new_node->next = NULL;
     
-    stack->top = new_node;        
-    stack->currentSize++;
+    if (isQueueEmpty(q)) { 
+        q->head = new_node; 
+    } else { 
+        q->tail->next = new_node; 
+    }
+    
+    q->tail = new_node;        
+    q->currentSize++;
 }
 
-void* pop(stack* stack) {
-    if (stack == NULL || stackEmpty(stack)) return;
+void dequeue(queue* q) {
+    if (q == NULL || isQueueEmpty(q)) return;
 
-    node* temp = stack->top;     
-    int variable = temp->data.variable;
-
-    stack->top = temp->next;        
-    free(temp);                 
-    stack->currentSize--;
+    node* temp = q->head;     
+    q->head = temp->next;
     
-    printf("%d\n", variable);
-}
-
-
-void printStack(stack* stack) {
-    if (stack == NULL || stackEmpty(stack)) {
-        return;
+    if (q->head == NULL) { 
+        q->tail = NULL; 
     }
 
-    node* current = stack->top;
+    free(temp);                 
+    q->currentSize--;           
+}
+
+void sumQueue(queue* q) {
+    int total = 0;
+    if (q != NULL && !isQueueEmpty(q)) {
+        node* current = q->head;
+        while (current != NULL) {
+            total += current->data;
+            current = current->next;
+        }
+    }
+    printf("%d\n", total);
+}
+
+void printQueue(queue* q) {
+    if (q == NULL || isQueueEmpty(q)) return;
+        
+    node* current = q->head;
     while (current != NULL) {
-        printf("%d ", current->data.variable);
+        printf("%d ", current->data);
         current = current->next;
     }
     printf("\n");
 }
 
-void sumStack(stack* stack) {
-    if (stack == NULL || stackEmpty(stack)) {
-        return;
-    }
+void freeQueue(queue **q) {
+    if (q == NULL || *q == NULL) return;
 
-    node* current = stack->top;
-    int temp = 0;
-    while (current != NULL) {
-        temp += *(int*) current->data.variable;
-        current = current->next;
-    }
-    printf("%d\n", temp);
-}
-
-void freeStack(stack **stack) {
-    if (stack == NULL || *stack == NULL) return;
-
-    node* current = (*stack)->top;
+    node* current = (*q)->head;
     node* nextNode;
 
     while (current != NULL) {
@@ -99,24 +97,27 @@ void freeStack(stack **stack) {
         current = nextNode;
     }
 
-    free(*stack);                   
-    *stack = NULL;                  
+    free(*q);               
+    *q = NULL;                      
 }
 
 int main(){
-    char comandInput[5];
-    void* stack = create_stack();
+    char commandInput[15];
+    queue* q = create_queue();
 
-    while (scanf("%s", &comandInput) != EOF)
-    {
-        if (comandInput == 'push') { push(stack); }
-        else if (comandInput == 'pop') { pop(stack); }
-        else if (comandInput == 'sum') { sumStack(stack); }
-        else if (comandInput == 'print') { printStack(stack); }
-        else if (comandInput == 'exit') { break; }
+    while (scanf("%s", commandInput) != EOF) {
+        if (strcmp(commandInput, "push") == 0) { 
+            int val;
+            scanf("%d", &val);
+            enqueue(q, val); 
+        }
+        else if (strcmp(commandInput, "pop") == 0) { dequeue(q); }
+        else if (strcmp(commandInput, "sum") == 0) { sumQueue(q); }
+        else if (strcmp(commandInput, "print") == 0) { printQueue(q); }
+        else if (strcmp(commandInput, "exit") == 0) { break; }
     }
 
-    freeStack(stack);
+    freeQueue(&q);
     
     return 0;
 }
