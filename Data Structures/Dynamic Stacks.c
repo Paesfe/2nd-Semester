@@ -2,15 +2,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-//Apêndice de Funções: Pilha Dinâmica Genérica (Stack) em C
-  
-typedef struct data {
-    void* variable;
-} data;
+// Apêndice de Funções: Pilha Dinâmica Genérica (Stack) em C CORRIGIDA
 
 // Estrutura de cada elemento (Nó) da pilha
 typedef struct node {
-    data data;          
+    int data;          
     struct node* next;   // Ponteiro para o próximo nó (abaixo na pilha)
 } node;
 
@@ -19,7 +15,6 @@ typedef struct stack {
     node* top;       
     int currentSize;     
 } stack;
-
 
 stack* create_stack() {
     stack* new_stack = (stack*) malloc(sizeof(stack));
@@ -35,58 +30,43 @@ bool stackEmpty(stack* stack) {
     return (stack->top == NULL);
 }
 
-
 int getStackSize(stack* stack) {
     if (stack == NULL) return 0;
     return stack->currentSize;
 }
 
-// Inserir novo elemento; 
+// Inserir novo elemento
 void push(stack* stack, void* data) {
     if (stack == NULL) return;
 
     node* new_node = (node*) malloc(sizeof(node));
     if (new_node == NULL) { return; } 
 
-    new_node->data->variable = data;
-    new_node->next = stack->top;  // O novo nó aponta para o nó que estava no topo
+    new_node->data = data; // CORRIGIDO: de '->' para '.'
+    new_node->next = stack->top;  
     
-    stack->top = new_node;        // O topo da pilha passa a ser o novo nó
+    stack->top = new_node;        
     stack->currentSize++;
 }
 
-// Remove and return the pointer to the unstacked top node; 
+// Remove e retorna o ponteiro do nó do topo
 void* pop(stack* stack) {
     if (stack == NULL || stackEmpty(stack)) { return NULL; }
 
     node* temp = stack->top;     
-    void* data = temp->data;
+    void* data_ptr = temp->data; // CORRIGIDO: pegando o ponteiro interno
 
     stack->top = temp->next;        
     free(temp);                 
     stack->currentSize--;
 
-    return data;               
+    return data_ptr;               
 }
 
-//Returns the top node without removing it
+// Retorna o nó do topo sem remover
 void* peek(stack* stack) {
     if (stack == NULL || stackEmpty(stack)) { return NULL; }
-    return stack->top->data;
-}
-
-//Print the stack from top to bottom, needing a aux function to convert void to a specific data type
-void printStack(stack* stack, void (*printData)(void*)) {
-    if (stack == NULL || stackEmpty(stack)) {
-        printf("Pilha Vazia\n");
-        return;
-    }
-
-    node* current = stack->top;
-    while (current != NULL) {
-        printData(current->data->variable);
-        current = current->next;
-    }
+    return stack->top->data; // CORRIGIDO: de '->' para '.'
 }
 
 void freeStack(stack **stack) {
@@ -97,10 +77,10 @@ void freeStack(stack **stack) {
 
     while (current != NULL) {
         nextNode = current->next;
-        free(current);              // Libera cada nó individualmente
+        free(current);              
         current = nextNode;
     }
 
-    free(*stack);                   // Libera a estrutura de controle da pilha
-    *stack = NULL;                  // Zera o ponteiro original por segurança
+    free(*stack);                   
+    *stack = NULL;                  
 }
